@@ -12,15 +12,23 @@
   // Internal private array which holds actual set elements
   var setArray;
 
+  let comparator = function(a, b) {return a-b;};
+
   // Constructor for the SortedSet class
   function SortedSet(initial) {
+    setArray = [];
+
     if (arguments.length > 0) {
-      // TODO: Handle the case when initial array is provided; if array has
-      // elements of duplicate value, reduce down to one instance and sort the
-      // elements in ascending order.
-      setArray = [];
-    } else {
-      setArray = [];
+      initial.sort(comparator);
+
+      let curr = initial[0];
+      setArray.push(initial[0]);
+      for (let i = 1; i < initial.length; i++) {
+        if(initial[i] !== curr) {
+          setArray.push(initial[i]);
+          curr = initial[i];
+        }
+      }
     }
   }
 
@@ -73,27 +81,63 @@
   /* Returns true if a given element exists in the set
    */
   SortedSet.prototype.contains = function(element) {
-    // TODO: Implement contains method
+    if(setArray.indexOf(element) > -1) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   /* Gets elements between startIndex and endIndex. If endIndex is omitted, a
    * single element at startIndex is returned.
    */
   SortedSet.prototype.get = function(startIndex, endIndex) {
-    // TODO: Implement get method
+
+    let output = [];
+
+    if(typeof startIndex !== 'undefined' && startIndex >= 0) {
+      if(typeof endIndex === 'undefined') {
+        return setArray[startIndex];
+      } else if(endIndex < setArray.length) {
+        for (let i = startIndex; i <= endIndex; i++) {
+          output.push(setArray[i]);
+        }
+      }
+    }
+    return output;
   };
 
   /* Gets all items between specified value range. If exclusive is set, values
    * at lower bound and upper bound are not included.
    */
   SortedSet.prototype.getBetween = function(lbound, ubound, exclusive) {
-    // TODO: Implement getBetween method
+
+    let output = [];
+    let startIndex = 0;
+    let endIndex = setArray.length-1;
+
+    if(typeof exclusive === 'undefined' || exclusive === false) {
+      while(setArray[startIndex] < lbound) {startIndex++;}
+      while(setArray[endIndex] > ubound) {endIndex --;}
+
+    } else {
+      while(setArray[startIndex] <= lbound) {startIndex++;}
+      while(setArray[endIndex] >= ubound) {endIndex --;}
+    }
+    for (let i=startIndex; i <= endIndex; i++) {
+      output.push(setArray[i]);
+    }
+
+    return output;
   };
 
   /* Adds new element to the set if not already in set
    */
   SortedSet.prototype.add = function(element) {
-    // TODO: Implement add method
+    if (this.contains(element) === false) {
+      setArray.push(element);
+      setArray.sort(comparator);
+    }
   };
 
 
@@ -106,30 +150,88 @@
   /* Removes element from set and returns the element
    */
   SortedSet.prototype.remove = function(element) {
-    // TODO: Implement remove method
+    if(this.contains(element)) {
+      let stack = [];
+      let elem;
+      while((elem = setArray.pop()) !== element) {
+        stack.push(elem);
+      }
+      while(stack.length > 0) {
+        setArray.push(stack.pop());
+      }
+      return elem;
+    }
   };
 
   /* Removes element at index location and returns the element
    */
   SortedSet.prototype.removeAt = function(index) {
-    // TODO: Implement removeAt method
+    if (index >= 0 && index < setArray.length) {
+      let stack = [];
+      let idx = setArray.length-1;
+
+      while(idx >= index) {
+        stack.push(setArray.pop());
+        idx--;
+      }
+
+      let elem = stack.pop();
+
+      while (stack.length > 0) {
+        setArray.push(stack.pop());
+      }
+      return elem;
+    }
   };
 
   /* Removes elements that are larger than lower bound and smaller than upper
    * bound and returns removed elements.
    */
   SortedSet.prototype.removeBetween = function(lbound, ubound, exclusive) {
-    // TODO: Implement removeBetween method
+    let startStack = [];
+    let endStack = [];
+
+    if(typeof exclusive === 'undefined' || exclusive === false) {
+      while(setArray[0] < lbound) {
+        startStack.push(setArray.shift());
+      }
+
+      while(setArray[setArray.length-1] > ubound) {
+        endStack.push(setArray.pop());
+      }
+    } else {
+      while(setArray[0] <= lbound) {
+        startStack.push(setArray.shift());
+      }
+
+      while(setArray[setArray.length-1] >= ubound) {
+        endStack.push(setArray.pop());
+      }
+    }
+
+    let output = [];
+    while(setArray.length > 0) {
+      output.push(setArray.shift());
+    }
+
+    while(startStack.length > 0) {
+      setArray.push(startStack.shift());
+    }
+
+    while(endStack.length > 0) {
+      setArray.push(endStack.pop());
+    }
+    return output;
   };
 
   /* Removes all elements from the set
    */
   SortedSet.prototype.clear = function() {
-    // TODO: Implement clear method
+    setArray.length = 0;
   };
 
   SortedSet.prototype.forEachAsync = function(callback, thisArg) {
-    // TODO: Implement for bonus marks
+    console.log("I need a better understanding of what Async is solving first and the research is out of the scope of this assignment.");
   };
 
   return SortedSet;
